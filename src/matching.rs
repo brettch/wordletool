@@ -1,11 +1,11 @@
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum LetterMatch {
     None,
     Partial,
     Exact,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct WordMatch {
     pub letters: Vec<LetterMatch>,
 }
@@ -14,10 +14,10 @@ pub fn match_words(test_word: &str, target_word: &str) -> WordMatch {
     let test_chars: Vec<_> = test_word.chars().collect();
     let target_chars: Vec<_> = target_word.chars().collect();
 
-    match_chars(test_chars, target_chars)
+    match_chars(&test_chars, &target_chars)
 }
 
-pub fn match_chars(test_chars: Vec<char>, target_chars: Vec<char>) -> WordMatch {
+pub fn match_chars(test_chars: &Vec<char>, target_chars: &Vec<char>) -> WordMatch {
     assert_eq!(test_chars.len(), target_chars.len());
 
     let word_length = test_chars.len();
