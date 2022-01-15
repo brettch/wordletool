@@ -1,7 +1,7 @@
 use std::{env::args, process::exit};
 
-mod dictionary;
 mod matching;
+mod words;
 
 fn main() {
     let args: Vec<_> = args().collect();
