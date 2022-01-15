@@ -1,5 +1,6 @@
 use std::{env::args, process::exit};
 
+mod dictionary;
 mod matching;
 
 fn main() {
