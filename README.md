@@ -12,3 +12,5 @@ command and follow the prompts.
 ```shell
 cargo run
 ```
+
+Note that the first iteration of "Calculating best guesses" may take several minutes depending on the speed of your computer.  After the first round, the possible solution set will get much smaller and quicker to search.
