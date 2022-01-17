@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, collections::HashSet};
 
 use crate::{bucket, guess, matching};
 
@@ -29,11 +29,13 @@ pub fn interactive_solve(solution_words: &Vec<&Vec<char>>, guess_words: &Vec<&Ve
 
         println!("Calculating remaining words ...");
         let bucket = bucket_map.get(word_match).unwrap();
-        // This is very inefficient, can't consume the bucket directly because it runs into borrow checker issues.
+        // This may seem unusual but we can't consume the bucket directly because it runs into borrow checker issues,
+        // we must consume from the original current_words collection instead.
+        let bucket_set: HashSet<_> = bucket.iter().cloned().collect();
         current_words = current_words.iter()
             .map(|&word| word)
             .filter(|word| {
-                bucket.contains(word)
+                bucket_set.contains(word)
             }).collect();
     }
 
@@ -43,10 +45,26 @@ pub fn interactive_solve(solution_words: &Vec<&Vec<char>>, guess_words: &Vec<&Ve
 }
 
 fn display_guess_options(guess_options: &Vec<&Vec<char>>, remaining_words: &Vec<&Vec<char>>) {
-    println!("Guess Options");
-    for (i, &guess) in guess_options.iter().enumerate() {
-        let in_remaining_words = remaining_words.contains(&guess);
-        println!("{}: {:?} {}", i, chars_to_string(guess), if in_remaining_words { "possible" } else { "not possible" } );
+    // If we have possible words (i.e. they're in the list of remaining words), we only display them.
+    let remaining_words_set: HashSet<_> = remaining_words.iter().cloned().collect();
+    let words_are_possible = remaining_words_set.contains(guess_options[0]);
+    let possible_filtered_guess_options: Vec<_> = guess_options.iter().cloned()
+        .take_while(|word| {
+            !words_are_possible || (words_are_possible && remaining_words_set.contains(word))
+        })
+        .collect();
+    let displayed_guess_options: Vec<_> = possible_filtered_guess_options.iter().take(10).cloned().collect();
+
+    print!("Guess Options");
+    if displayed_guess_options.len() < possible_filtered_guess_options.len() {
+        print!(" ({} of {} shown)", displayed_guess_options.len(), possible_filtered_guess_options.len());
+    }
+    if !words_are_possible {
+        print!(" (Note: none of these are possible solutions)")
+    }
+    println!("");
+    for (i, &guess) in displayed_guess_options.iter().enumerate() {
+        println!("{}: {:?}", i, chars_to_string(guess));
     }
 }
 
