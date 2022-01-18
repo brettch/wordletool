@@ -1,8 +1,15 @@
-use std::{cmp::Ordering, collections::HashSet};
+use std::{cmp, cmp::Ordering, collections::HashSet};
 
 use crate::bucket;
 
-pub fn best_guesses<'a>(solution_words: &Vec<&Vec<char>>, guess_words: &'a Vec<&Vec<char>>) -> Vec<&'a Vec<char>> {
+pub struct Guess<'a> {
+    pub value: &'a Vec<char>,
+    pub possible: bool,
+    pub bucket_size_max: usize,
+    pub bucket_variance: usize,
+}
+
+pub fn best_guesses<'a>(solution_words: &Vec<&Vec<char>>, guess_words: &'a Vec<&Vec<char>>) -> Vec<Guess<'a>> {
     assert_ne!(0, solution_words.len());
     assert_ne!(0, guess_words.len());
 
@@ -25,21 +32,41 @@ pub fn best_guesses<'a>(solution_words: &Vec<&Vec<char>>, guess_words: &'a Vec<&
     });
 
     let mut result = Vec::new();
-    let mut best_max_bucket_size = usize::MAX;
-    for current_guess in prioritised_guess_words {
-        let bucket_map = bucket::bucket_guess(solution_words, current_guess);
-        let max_bucket_size = bucket_map.values()
+    for guess_word in prioritised_guess_words {
+        let bucket_map = bucket::bucket_guess(solution_words, guess_word);
+        let (bucket_size_max, bucket_variance) = bucket_map.values()
             .map(|b| { b.len() })
-            .max()
-            .unwrap_or(usize::MAX);
-        if max_bucket_size < best_max_bucket_size {
-            best_max_bucket_size = max_bucket_size;
-            result.clear();
-        }
-        if max_bucket_size <= best_max_bucket_size {
-            result.push(current_guess);
-        }
+            .fold((0, 1), |(max_bucket_size, bucket_variance), bucket_size| {
+                (cmp::max(max_bucket_size, bucket_size), bucket_variance + (bucket_size * bucket_size))
+            });
+
+        let guess = Guess {
+            value: guess_word,
+            possible: solution_word_set.contains(guess_word),
+            bucket_size_max,
+            bucket_variance,
+        };
+
+        result.push(guess);
     }
+
+    // We sort by the following criteria:
+    // 1. Bucket size max descending
+    // 2. Bucket variance descending
+    // 3. Possible solution word preferred
+    // 4. Alphabetical
+    result.sort_by(|a, b| {
+        if a.bucket_size_max != b.bucket_size_max {
+            return a.bucket_size_max.cmp(&b.bucket_size_max);
+        }
+        if a.bucket_variance != b.bucket_variance {
+            return a.bucket_variance.cmp(&b.bucket_variance);
+        }
+        if a.possible != b.possible {
+            return if a.possible { Ordering::Less } else { Ordering::Greater }
+        }
+        a.value.cmp(b.value)
+    });
 
     result
 }

@@ -10,14 +10,14 @@ pub fn interactive_solve(solution_words: &Vec<&Vec<char>>, guess_words: &Vec<&Ve
         println!("Calculating best guesses ...");
         // let guess_options = guess::best_guesses(&current_words, guess_words);
         let guess_options = guess::best_guesses(&current_words, &guess_words);
-        display_guess_options(&guess_options, &current_words);
+        display_guess_options(&guess_options);
 
         println!("Which guess do you pick (enter number):");
         let guess_index = get_user_input_index(guess_options.len())?;
-        let guess = guess_options[guess_index];
-        println!("Guess selected: {}", chars_to_string(guess));
+        let guess = &guess_options[guess_index];
+        println!("Guess selected: {}", chars_to_string(guess.value));
 
-        let bucket_map = bucket::bucket_guess(&current_words, guess);
+        let bucket_map = bucket::bucket_guess(&current_words, guess.value);
         let mut match_options: Vec<_> = bucket_map.keys().collect();
         match_options.sort();
         display_match_options(&match_options);
@@ -44,27 +44,20 @@ pub fn interactive_solve(solution_words: &Vec<&Vec<char>>, guess_words: &Vec<&Ve
     Result::Ok(())
 }
 
-fn display_guess_options(guess_options: &Vec<&Vec<char>>, remaining_words: &Vec<&Vec<char>>) {
-    // If we have possible words (i.e. they're in the list of remaining words), we only display them.
-    let remaining_words_set: HashSet<_> = remaining_words.iter().cloned().collect();
-    let words_are_possible = remaining_words_set.contains(guess_options[0]);
-    let possible_filtered_guess_options: Vec<_> = guess_options.iter().cloned()
-        .take_while(|word| {
-            !words_are_possible || (words_are_possible && remaining_words_set.contains(word))
-        })
-        .collect();
-    let displayed_guess_options: Vec<_> = possible_filtered_guess_options.iter().take(10).cloned().collect();
+fn display_guess_options(guess_options: &Vec<guess::Guess>) {
+    const MAXIMUM_TO_DISPLAY: usize = 20;
 
-    print!("Guess Options");
-    if displayed_guess_options.len() < possible_filtered_guess_options.len() {
-        print!(" ({} of {} shown)", displayed_guess_options.len(), possible_filtered_guess_options.len());
-    }
-    if !words_are_possible {
-        print!(" (Note: none of these are possible solutions)")
-    }
-    println!("");
-    for (i, &guess) in displayed_guess_options.iter().enumerate() {
-        println!("{}: {:?}", i, chars_to_string(guess));
+    println!("Guess Options (low max bucket size and low variance are better)");
+
+    for (i, guess) in guess_options.iter().take(MAXIMUM_TO_DISPLAY).enumerate() {
+        println!(
+            "{}: {:?} (bucket_size_max={}, bucket_variance={}, possible={})",
+            i,
+            chars_to_string(guess.value),
+            guess.bucket_size_max,
+            guess.bucket_variance,
+            guess.possible,
+        );
     }
 }
 
@@ -79,7 +72,7 @@ fn get_user_input() -> Result<String, io::Error> {
     let mut user_input = String::new();
     std::io::stdin().read_line(&mut user_input)?;
     let result = user_input.trim_end().to_string();
-    println!("User input: {}: ", result);
+    println!("User input: {}", result);
     Ok(result)
 }
 
