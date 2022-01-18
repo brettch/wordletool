@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::{cmp, cmp::Ordering, collections::HashSet};
 
 use crate::bucket;
@@ -31,8 +32,7 @@ pub fn best_guesses<'a>(solution_words: &Vec<&Vec<char>>, guess_words: &'a Vec<&
         return Ordering::Greater;
     });
 
-    let mut result = Vec::new();
-    for guess_word in prioritised_guess_words {
+    let mut result: Vec<Guess> = prioritised_guess_words.par_iter().map(|&guess_word| {
         let bucket_map = bucket::bucket_guess(solution_words, guess_word);
         let (bucket_size_max, bucket_variance) = bucket_map.values()
             .map(|b| { b.len() })
@@ -40,15 +40,13 @@ pub fn best_guesses<'a>(solution_words: &Vec<&Vec<char>>, guess_words: &'a Vec<&
                 (cmp::max(max_bucket_size, bucket_size), bucket_variance + (bucket_size * bucket_size))
             });
 
-        let guess = Guess {
+        Guess {
             value: guess_word,
             possible: solution_word_set.contains(guess_word),
             bucket_size_max,
             bucket_variance,
-        };
-
-        result.push(guess);
-    }
+        }
+    }).collect();
 
     // We sort by the following criteria:
     // 1. Bucket size max descending
