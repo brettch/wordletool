@@ -10,7 +10,7 @@ pub struct WordMatch {
     pub letters: Vec<LetterMatch>,
 }
 
-pub fn match_chars(test_chars: &Vec<char>, target_chars: &Vec<char>) -> WordMatch {
+pub fn match_chars(test_chars: &[char], target_chars: &[char]) -> WordMatch {
     assert_eq!(test_chars.len(), target_chars.len());
 
     let word_length = test_chars.len();

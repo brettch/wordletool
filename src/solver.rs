@@ -2,14 +2,14 @@ use std::{io, collections::HashSet};
 
 use crate::{bucket, guess, matching};
 
-pub fn interactive_solve(solution_words: &Vec<&Vec<char>>, guess_words: &Vec<&Vec<char>>) -> Result<(), io::Error> {
-    let mut current_words: Vec<_> = solution_words.iter().map(|&f| { f }).collect();
+pub fn interactive_solve(solution_words: &[&Vec<char>], guess_words: &[&Vec<char>]) -> Result<(), io::Error> {
+    let mut current_words: Vec<_> = solution_words.iter().copied().collect();
 
     while current_words.len() > 1 {
         println!("{} words are available", current_words.len());
         println!("Calculating best guesses ...");
         // let guess_options = guess::best_guesses(&current_words, guess_words);
-        let guess_options = guess::best_guesses(&current_words, &guess_words);
+        let guess_options = guess::best_guesses(&current_words, guess_words);
         display_guess_options(&guess_options);
 
         println!("Which guess do you pick (enter number):");
@@ -33,7 +33,7 @@ pub fn interactive_solve(solution_words: &Vec<&Vec<char>>, guess_words: &Vec<&Ve
         // we must consume from the original current_words collection instead.
         let bucket_set: HashSet<_> = bucket.iter().cloned().collect();
         current_words = current_words.iter()
-            .map(|&word| word)
+            .copied()
             .filter(|word| {
                 bucket_set.contains(word)
             }).collect();
@@ -44,7 +44,7 @@ pub fn interactive_solve(solution_words: &Vec<&Vec<char>>, guess_words: &Vec<&Ve
     Result::Ok(())
 }
 
-fn display_guess_options(guess_options: &Vec<guess::Guess>) {
+fn display_guess_options(guess_options: &[guess::Guess]) {
     const MAXIMUM_TO_DISPLAY: usize = 20;
 
     println!("Guess Options (low max bucket size and low variance are better)");
@@ -61,7 +61,7 @@ fn display_guess_options(guess_options: &Vec<guess::Guess>) {
     }
 }
 
-fn display_match_options(match_options: &Vec<&matching::WordMatch>) {
+fn display_match_options(match_options: &[&matching::WordMatch]) {
     println!("Match Options");
     for (i, &option) in match_options.iter().enumerate() {
         println!("{}: {:?}", i, option.letters);
@@ -95,6 +95,6 @@ fn get_user_input_index(upper_bound: usize) -> Result<usize, io::Error> {
     }
 }
 
-fn chars_to_string(chars: &Vec<char>) -> String {
+fn chars_to_string(chars: &[char]) -> String {
     chars.iter().collect()
 }

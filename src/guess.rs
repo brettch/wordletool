@@ -10,7 +10,7 @@ pub struct Guess<'a> {
     pub bucket_variance: usize,
 }
 
-pub fn best_guesses<'a>(solution_words: &Vec<&Vec<char>>, guess_words: &'a Vec<&Vec<char>>) -> Vec<Guess<'a>> {
+pub fn best_guesses<'a>(solution_words: &[&Vec<char>], guess_words: &'a [&Vec<char>]) -> Vec<Guess<'a>> {
     assert_ne!(0, solution_words.len());
     assert_ne!(0, guess_words.len());
 
@@ -24,12 +24,12 @@ pub fn best_guesses<'a>(solution_words: &Vec<&Vec<char>>, guess_words: &'a Vec<&
         let b_is_possible = solution_word_set.contains(b);
 
         if a_is_possible == b_is_possible {
-            return a.cmp(b);
+            a.cmp(b)
+        } else if a_is_possible {
+            Ordering::Less
+        } else {
+            Ordering::Greater
         }
-        if a_is_possible {
-            return Ordering::Less;
-        }
-        return Ordering::Greater;
     });
 
     let mut result: Vec<Guess> = prioritised_guess_words.par_iter().map(|&guess_word| {
