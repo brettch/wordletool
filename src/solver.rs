@@ -31,7 +31,7 @@ pub fn interactive_solve(solution_words: &[&Vec<char>], guess_words: &[&Vec<char
         let bucket = bucket_map.get(word_match).unwrap();
         // This may seem unusual but we can't consume the bucket directly because it runs into borrow checker issues,
         // we must consume from the original current_words collection instead.
-        let bucket_set: HashSet<_> = bucket.iter().cloned().collect();
+        let bucket_set: HashSet<_> = bucket.iter().copied().collect();
         current_words = current_words.iter()
             .copied()
             .filter(|word| {

@@ -17,7 +17,7 @@ pub fn best_guesses<'a>(solution_words: &[&Vec<char>], guess_words: &'a [&Vec<ch
     // We prioritise (i.e. sort) by two criteria:
     // 1. Guesses in the possible solution are preferred.
     // 2. Alphabetically.
-    let solution_word_set: HashSet<_> = solution_words.iter().cloned().collect();
+    let solution_word_set: HashSet<_> = solution_words.iter().copied().collect();
     let mut prioritised_guess_words = guess_words.to_vec();
     prioritised_guess_words.sort_by(|a, b| {
         let a_is_possible = solution_word_set.contains(a);
