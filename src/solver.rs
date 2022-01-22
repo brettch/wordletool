@@ -1,6 +1,7 @@
 use std::{io, collections::HashSet};
 
 use crate::{bucket, guess, matching};
+use crate::input;
 
 pub fn interactive_solve(solution_words: &[&Vec<char>], guess_words: &[&Vec<char>]) -> Result<(), io::Error> {
     let mut current_words: Vec<_> = solution_words.iter().copied().collect();
@@ -13,7 +14,7 @@ pub fn interactive_solve(solution_words: &[&Vec<char>], guess_words: &[&Vec<char
         display_guess_options(&guess_options);
 
         println!("Which guess do you pick (enter number):");
-        let guess_index = get_user_input_index(guess_options.len())?;
+        let guess_index = input::get_index(guess_options.len())?;
         let guess = &guess_options[guess_index];
         println!("Guess selected: {}", chars_to_string(guess.value));
 
@@ -23,7 +24,7 @@ pub fn interactive_solve(solution_words: &[&Vec<char>], guess_words: &[&Vec<char
         display_match_options(&match_options);
 
         println!("Which match value did you get (enter number):");
-        let match_index = get_user_input_index(match_options.len())?;
+        let match_index = input::get_index(match_options.len())?;
         let word_match = match_options[match_index];
         println!("Match selected: {:?}", word_match);
 
@@ -65,33 +66,6 @@ fn display_match_options(match_options: &[&matching::WordMatch]) {
     println!("Match Options");
     for (i, &option) in match_options.iter().enumerate() {
         println!("{}: {:?}", i, option.letters);
-    }
-}
-
-fn get_user_input() -> Result<String, io::Error> {
-    let mut user_input = String::new();
-    std::io::stdin().read_line(&mut user_input)?;
-    let result = user_input.trim_end().to_string();
-    println!("User input: {}", result);
-    Ok(result)
-}
-
-fn get_user_input_index(upper_bound: usize) -> Result<usize, io::Error> {
-    loop {
-        print!("<0..{}>: ", upper_bound - 1);
-        let user_input = get_user_input()?;
-        let index = match user_input.parse::<usize>() {
-            Ok(number)  => number,
-            Err(_) => {
-                println!("Invalid number, try again ...");
-                continue;
-            },
-        };
-        if index >= upper_bound {
-            println!("Number is too high, please try again ...");
-            continue;
-        }
-        return Ok(index);
     }
 }
 

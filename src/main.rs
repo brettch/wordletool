@@ -2,6 +2,7 @@ use std::io;
 
 mod guess;
 mod bucket;
+mod input;
 mod matching;
 mod solver;
 mod words;
