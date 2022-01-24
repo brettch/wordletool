@@ -1,8 +1,8 @@
 use std::io;
 
-pub fn get_index(upper_bound: usize) -> Result<usize, io::Error> {
+pub fn get_index(lower_bound:usize, upper_bound: usize) -> Result<usize, io::Error> {
     loop {
-        print!("<0..{}>: ", upper_bound - 1);
+        println!("<{}..{}>: ", lower_bound, upper_bound - 1);
         let user_input = get_user_input()?;
         let index = match user_input.parse::<usize>() {
             Ok(number)  => number,
@@ -11,6 +11,11 @@ pub fn get_index(upper_bound: usize) -> Result<usize, io::Error> {
                 continue;
             },
         };
+
+        if index < lower_bound {
+            println!("Number is too low, please try again ...");
+            continue;
+        }
         if index >= upper_bound {
             println!("Number is too high, please try again ...");
             continue;

@@ -14,7 +14,7 @@ pub fn interactive_solve(solution_words: &[&Vec<char>], guess_words: &[&Vec<char
         display_guess_options(&guess_options);
 
         println!("Which guess do you pick (enter number):");
-        let guess_index = input::get_index(guess_options.len())?;
+        let guess_index = input::get_index(0, guess_options.len())?;
         let guess = &guess_options[guess_index];
         println!("Guess selected: {}", chars_to_string(guess.value));
 
@@ -24,7 +24,7 @@ pub fn interactive_solve(solution_words: &[&Vec<char>], guess_words: &[&Vec<char
         display_match_options(&match_options);
 
         println!("Which match value did you get (enter number):");
-        let match_index = input::get_index(match_options.len())?;
+        let match_index = input::get_index(0, match_options.len())?;
         let word_match = match_options[match_index];
         println!("Match selected: {:?}", word_match);
 
