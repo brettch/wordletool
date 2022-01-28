@@ -49,6 +49,13 @@ pub fn match_chars(test_chars: &[char], target_chars: &[char]) -> WordMatch {
 mod tests {
     use super::*;
 
+    fn match_words(test_word: &str, target_word: &str) -> WordMatch {
+        match_chars(
+            &test_word.chars().collect::<Vec<_>>(),
+            &target_word.chars().collect::<Vec<_>>()
+        )
+    }
+
     #[test]
     fn test_no_match() {
         assert_eq!(
